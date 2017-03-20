@@ -1,0 +1,96 @@
+diff --git a/mingw-config b/mingw-config
+index f4ad6dba..4cb69be3 100755
+--- a/mingw-config
++++ b/mingw-config
+@@ -55,7 +55,7 @@
+# * libssh2
+# * cppunit
+
+-test -z "$HOST" && HOST=i686-w64-mingw32
++test -z "$HOST" && HOST=x86_64-w64-mingw64
+test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+
+./configure \
+@@ -63,7 +63,7 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+     --prefix=$PREFIX \
+     --without-included-gettext \
+     --disable-nls \
+-    --with-libcares \
++    --without-libcares \
+     --without-gnutls \
+     --without-openssl \
+     --with-sqlite3 \
+@@ -77,5 +77,5 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+     --with-cppunit-prefix=$PREFIX \
+     ARIA2_STATIC=yes \
+     CPPFLAGS="-I$PREFIX/include" \
+-    LDFLAGS="-L$PREFIX/lib" \
++    LDFLAGS="-L$PREFIX/lib -L/mingw64/lib" \
+     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
+index b8f07770..631a7c23 100644
+--- a/src/OptionHandlerFactory.cc
++++ b/src/OptionHandlerFactory.cc
+@@ -158,7 +158,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(new BooleanOptionHandler(
+-        PREF_CONTINUE, TEXT_CONTINUE, A2_V_FALSE, OptionHandler::OPT_ARG, 'c'));
++        PREF_CONTINUE, TEXT_CONTINUE, A2_V_TRUE, OptionHandler::OPT_ARG, 'c'));
+     op->addTag(TAG_BASIC);
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+@@ -432,7 +432,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   {
+     OptionHandler* op(new NumberOptionHandler(PREF_MAX_CONCURRENT_DOWNLOADS,
+                                               TEXT_MAX_CONCURRENT_DOWNLOADS,
+-                                              "5", 1, -1, 'j'));
++                                              "128", 1, -1, 'j'));
+     op->addTag(TAG_BASIC);
+     op->setChangeGlobalOption(true);
+     handlers.push_back(op);
+@@ -440,7 +440,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   {
+     OptionHandler* op(new NumberOptionHandler(PREF_MAX_CONNECTION_PER_SERVER,
+                                               TEXT_MAX_CONNECTION_PER_SERVER,
+-                                              "1", 1, 16, 'x'));
++                                              "16", 1, -1, 'x'));
+     op->addTag(TAG_BASIC);
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+@@ -501,7 +501,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(new UnitNumberOptionHandler(
+-        PREF_MIN_SPLIT_SIZE, TEXT_MIN_SPLIT_SIZE, "20M", 1_m, 1_g, 'k'));
++        PREF_MIN_SPLIT_SIZE, TEXT_MIN_SPLIT_SIZE, "1M", 1_k, 1_g, 'k'));
+     op->addTag(TAG_BASIC);
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+@@ -905,7 +905,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(new UnitNumberOptionHandler(
+-        PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g));
++        PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_k, 1_g));
+     op->addTag(TAG_ADVANCED);
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+@@ -971,7 +971,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(
+-        new NumberOptionHandler(PREF_SPLIT, TEXT_SPLIT, "5", 1, -1, 's'));
++        new NumberOptionHandler(PREF_SPLIT, TEXT_SPLIT, "128", 1, -1, 's'));
+     op->addTag(TAG_BASIC);
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+@@ -1049,7 +1049,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   {
+     OptionHandler* op(
+         new BooleanOptionHandler(PREF_CHECK_CERTIFICATE, TEXT_CHECK_CERTIFICATE,
+-                                 A2_V_TRUE, OptionHandler::OPT_ARG));
++                                 A2_V_FALSE, OptionHandler::OPT_ARG));
+     op->addTag(TAG_HTTP);
+     op->addTag(TAG_HTTPS);
+     handlers.push_back(op);
