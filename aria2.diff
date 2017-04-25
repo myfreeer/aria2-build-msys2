@@ -1,16 +1,23 @@
 diff --git a/mingw-config b/mingw-config
-index f4ad6dba..4cb69be3 100755
+index f4ad6dba..371b7824 100755
 --- a/mingw-config
 +++ b/mingw-config
 @@ -55,7 +55,7 @@
-# * libssh2
-# * cppunit
+ # * libssh2
+ # * cppunit
 
 -test -z "$HOST" && HOST=i686-w64-mingw32
 +test -z "$HOST" && HOST=x86_64-w64-mingw32
-test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
 
-./configure \
+ ./configure \
+@@ -77,5 +77,5 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+     --with-cppunit-prefix=$PREFIX \
+     ARIA2_STATIC=yes \
+     CPPFLAGS="-I$PREFIX/include" \
+-    LDFLAGS="-L$PREFIX/lib" \
++    LDFLAGS="-L$PREFIX/lib -L/mingw64/lib" \
+     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
 index b8f07770..631a7c23 100644
 --- a/src/OptionHandlerFactory.cc
