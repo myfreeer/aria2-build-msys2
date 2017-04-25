@@ -54,6 +54,9 @@
 # * zlib
 # * libssh2
 # * cppunit
+wget https://gist.github.com/myfreeer/a780c730b7282e090f238e8286f815f3/raw/aria2.diff
+git apply aria2.diff
+autoreconf -i
 
 test -z "$HOST" && HOST=x86_64-w64-mingw32
 test -z "$PREFIX" && PREFIX=/usr/local/$HOST
@@ -79,3 +82,6 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib -L/mingw64/lib" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+
+make -j2
+strip src/aria2.exe
