@@ -1,70 +1,81 @@
-#!/bin/sh -e
+#! /bin/bash
 
-# aria2 - The high speed download utility
-#
-# Copyright (C) 2012 Tatsuhiro Tsujikawa
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-#
-# In addition, as a special exception, the copyright holders give
-# permission to link the code of portions of this program with the
-# OpenSSL library under certain conditions as described in each
-# individual source file, and distribute linked combinations
-# including the two.
-# You must obey the GNU General Public License in all respects
-# for all of the code used other than OpenSSL.  If you modify
-# file(s) with this exception, you may extend this exception to your
-# version of the file(s), but you are not obligated to do so.  If you
-# do not wish to do so, delete this exception statement from your
-# version.  If you delete this exception statement from all source
-# files in the program, then also delete it here.
+test -z "$HOST" && HOST=x86_64-w64-mingw32
+test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
 
-# This is the configure script wrapper for cross-compiling MinGW32
-# build on Debian Linux using mingw-w64. Some environment variables
-# can be adjusted to change build settings:
-#
-# HOST: cross-compile to build programs to run on HOST. It defaults to
-#       i686-w64-mingw32. To build 64 bit binary, specify
-#       x86_64-w64-mingw32.
-#
-# PREFIX: Prefix to the directory where dependent libraries are
-#       installed.  It defaults to /usr/local/$HOST. -I$PREFIX/include
-#       will be added to CPPFLAGS. -L$PREFIX/lib will be added to
-#       LDFLAGS. $PREFIX/lib/pkgconfig will be set to
-#       PKG_CONFIG_LIBDIR.
-#
-# In this configuration, the following dependent libraries are used:
-#
-# * c-ares
-# * gmp
-# * expat
-# * sqlite3
-# * zlib
-# * libssh2
-# * cppunit
-wget https://gist.github.com/myfreeer/a780c730b7282e090f238e8286f815f3/raw/aria2.diff
-git apply aria2.diff
-wget https://github.com/q3aql/aria2-static-builds/raw/master/build-scripts/mingw-config/aria2-x86_64-w64-mingw-build-libs
-chmod 755 aria2-x86_64-w64-mingw-build-libs
-./aria2-x86_64-w64-mingw-build-libs
+wget --no-check-certificate https://downloads.sourceforge.net/project/expat/expat/2.2.0/expat-2.2.0.tar.bz2
+tar xf expat-2.2.0.tar.bz2
+cd expat-2.2.0
+./configure \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST
+make install -j$CPUCOUNT
+cd ..
 
-autoreconf -i
+wget --no-check-certificate https://www.sqlite.org/2017/sqlite-autoconf-3160200.tar.gz
+tar xf sqlite-autoconf-3160200.tar.gz
+cd sqlite-autoconf-3160200
+./configure \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+make install -j$CPUCOUNT
+cd ..
 
-wget https://github.com/q3aql/aria2-static-builds/raw/master/build-scripts/mingw-config/aria2-x86_64-w64-mingw-config
-chmod 755 aria2-x86_64-w64-mingw-config
-./aria2-x86_64-w64-mingw-config
+wget --no-check-certificate https://c-ares.haxx.se/download/c-ares-1.12.0.tar.gz
+tar xf c-ares-1.12.0.tar.gz
+cd c-ares-1.12.0 && \
+./configure \
+    --disable-shared \
+    --enable-static \
+    --without-random \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    LIBS="-lws2_32"
+make install -j$CPUCOUNT
+cd ..
 
-make -j2
-strip src/aria2.exe
+wget --no-check-certificate https://libssh2.org/download/libssh2-1.8.0.tar.gz
+tar xf libssh2-1.8.0.tar.gz
+cd libssh2-1.8.0
+./configure \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    --without-openssl \
+    --with-wincng \
+    LIBS="-lws2_32"
+make install -j$CPUCOUNT
+cd ..
+
+git clone https://github.com/aria2/aria2 --depth=1
+cd aria2
+patch -Np1 <../aria2.diff
+./configure \
+    --host=$HOST \
+    --prefix=$PREFIX \
+    --without-included-gettext \
+    --disable-nls \
+    --with-libcares \
+    --without-gnutls \
+    --without-openssl \
+    --with-sqlite3 \
+    --without-libxml2 \
+    --with-libexpat \
+    --with-libz \
+    --with-libgmp \
+    --with-libssh2 \
+    --without-libgcrypt \
+    --without-libnettle \
+    --with-cppunit-prefix=$PREFIX \
+    ARIA2_STATIC=yes \
+    CPPFLAGS="-I$PREFIX/include" \
+    LDFLAGS="-L$PREFIX/lib" \
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+make -j$CPUCOUNT
+strip src/aria2c.exe

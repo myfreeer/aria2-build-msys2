@@ -1,0 +1,20 @@
+environment:
+  matrix:
+    - MSYSTEM: MINGW64
+
+shallow_clone: true
+test: off
+
+install:
+  # Update core packages
+  - C:\msys64\usr\bin\pacman -Syyuu --noconfirm
+  # Update non-core packages
+  - C:\msys64\usr\bin\pacman -Suu --noconfirm
+  # Install required MSYS2 packages
+  - C:\msys64\usr\bin\pacman -S --noconfirm --needed base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-expat mingw-w64-x86_64-gmp mingw-w64-x86_64-c-ares
+build_script:
+  - C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./build-aria2.sh"
+on_success:
+- cmd: >-
+    7z a aria2c.7z .\src\aria2c.exe
+    appveyor PushArtifact aria2c.7z

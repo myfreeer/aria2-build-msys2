@@ -1,16 +1,5 @@
-diff --git a/mingw-config b/mingw-config
-index f4ad6dba..82e81d4d 100755
---- a/mingw-config
-+++ b/mingw-config
-@@ -78,4 +78,4 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
-     ARIA2_STATIC=yes \
-     CPPFLAGS="-I$PREFIX/include" \
-     LDFLAGS="-L$PREFIX/lib" \
--    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-\ No newline at end of file
 diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
-index b8f07770..631a7c23 100644
+index b8f07770..0aaeda83 100644
 --- a/src/OptionHandlerFactory.cc
 +++ b/src/OptionHandlerFactory.cc
 @@ -158,7 +158,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
@@ -49,6 +38,15 @@ index b8f07770..631a7c23 100644
      op->addTag(TAG_BASIC);
      op->addTag(TAG_FTP);
      op->addTag(TAG_HTTP);
+@@ -834,7 +834,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(new NumberOptionHandler(
+-        PREF_CONNECT_TIMEOUT, TEXT_CONNECT_TIMEOUT, "60", 1, 600));
++        PREF_CONNECT_TIMEOUT, TEXT_CONNECT_TIMEOUT, "30", 1, 600));
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+     op->setInitialOption(true);
 @@ -905,7 +905,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
    }
    {
@@ -58,6 +56,15 @@ index b8f07770..631a7c23 100644
      op->addTag(TAG_ADVANCED);
      op->addTag(TAG_FTP);
      op->addTag(TAG_HTTP);
+@@ -926,7 +926,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(
+-        new NumberOptionHandler(PREF_RETRY_WAIT, TEXT_RETRY_WAIT, "0", 0, 600));
++        new NumberOptionHandler(PREF_RETRY_WAIT, TEXT_RETRY_WAIT, "2", 0, 600));
+     op->addTag(TAG_FTP);
+     op->addTag(TAG_HTTP);
+     op->setInitialOption(true);
 @@ -971,7 +971,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
    }
    {
