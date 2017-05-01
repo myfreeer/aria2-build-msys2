@@ -22,7 +22,7 @@ cd sqlite-autoconf-3160200
     --disable-shared \
     --enable-static \
     --prefix=/usr/local/$HOST \
-    --host=$HOST \
+    --host=$HOST
 make install -j$CPUCOUNT
 cd ..
 
