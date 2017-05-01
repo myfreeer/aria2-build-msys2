@@ -56,6 +56,7 @@ cd ..
 git clone https://github.com/aria2/aria2 --depth=1
 cd aria2
 patch -Np1 <../aria2.diff
+autoreconf -i
 ./configure \
     --host=$HOST \
     --prefix=$PREFIX \
