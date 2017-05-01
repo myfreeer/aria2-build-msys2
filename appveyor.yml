@@ -11,6 +11,7 @@ build_script:
     set MSYSTEM=MINGW64
 
     C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./build-aria2.sh"
+test: off
 on_success:
 - cmd: >-
     7z a aria2c.7z aria2\src\aria2c.exe
