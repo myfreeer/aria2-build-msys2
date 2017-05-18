@@ -40,7 +40,7 @@ make install -j$CPUCOUNT
 cd ..
 
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3160200.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3180000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
