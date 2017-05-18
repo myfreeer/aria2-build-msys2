@@ -10,9 +10,9 @@ MINGW64)
     ;;
 esac
 
-pacman -S --noconfirm --needed MINGW_PACKAGE_PREFIX-toolchain MINGW_PACKAGE_PREFIX-expat MINGW_PACKAGE_PREFIX-gmp MINGW_PACKAGE_PREFIX-c-ares
+pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-toolchain $MINGW_PACKAGE_PREFIX-expat $MINGW_PACKAGE_PREFIX-gmp $MINGW_PACKAGE_PREFIX-c-ares
 
-test -z "$PREFIX" && PREFIX=/usr/local/$HOST
+PREFIX=/usr/local/$HOST
 CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
 curl_opts=(/usr/bin/curl --connect-timeout 15 --retry 3
     --retry-delay 5 --silent --location --insecure --fail)
