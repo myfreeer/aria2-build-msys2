@@ -1,5 +1,14 @@
+From ac269cf2b9c7e6896439b26ee422d33af30fbcd7 Mon Sep 17 00:00:00 2001
+From: myfreeer <myfreeer@users.noreply.github.com>
+Date: Mon, 29 May 2017 22:11:33 +0800
+Subject: [PATCH 2/2] options: unlock connection-per-server limit
+
+---
+ src/OptionHandlerFactory.cc | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
 diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
-index b8f07770..0aaeda83 100644
+index 79705aab..6ce0b946 100644
 --- a/src/OptionHandlerFactory.cc
 +++ b/src/OptionHandlerFactory.cc
 @@ -158,7 +158,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
@@ -16,7 +25,7 @@ index b8f07770..0aaeda83 100644
      OptionHandler* op(new NumberOptionHandler(PREF_MAX_CONCURRENT_DOWNLOADS,
                                                TEXT_MAX_CONCURRENT_DOWNLOADS,
 -                                              "5", 1, -1, 'j'));
-+                                              "128", 1, -1, 'j'));
++                                              "16", 1, -1, 'j'));
      op->addTag(TAG_BASIC);
      op->setChangeGlobalOption(true);
      handlers.push_back(op);
@@ -61,7 +70,7 @@ index b8f07770..0aaeda83 100644
    {
      OptionHandler* op(
 -        new NumberOptionHandler(PREF_RETRY_WAIT, TEXT_RETRY_WAIT, "0", 0, 600));
-+        new NumberOptionHandler(PREF_RETRY_WAIT, TEXT_RETRY_WAIT, "2", 0, 600));
++        new NumberOptionHandler(PREF_RETRY_WAIT, TEXT_RETRY_WAIT, "1", 0, 600));
      op->addTag(TAG_FTP);
      op->addTag(TAG_HTTP);
      op->setInitialOption(true);
@@ -74,12 +83,6 @@ index b8f07770..0aaeda83 100644
      op->addTag(TAG_BASIC);
      op->addTag(TAG_FTP);
      op->addTag(TAG_HTTP);
-@@ -1049,7 +1049,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
-   {
-     OptionHandler* op(
-         new BooleanOptionHandler(PREF_CHECK_CERTIFICATE, TEXT_CHECK_CERTIFICATE,
--                                 A2_V_TRUE, OptionHandler::OPT_ARG));
-+                                 A2_V_FALSE, OptionHandler::OPT_ARG));
-     op->addTag(TAG_HTTP);
-     op->addTag(TAG_HTTPS);
-     handlers.push_back(op);
+-- 
+2.12.1
+

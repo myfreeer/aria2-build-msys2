@@ -1,0 +1,54 @@
+From a21c65112cac1d392c35ce7ced5eac17638d27e7 Mon Sep 17 00:00:00 2001
+From: myfreeer <myfreeer@users.noreply.github.com>
+Date: Mon, 29 May 2017 22:06:13 +0800
+Subject: [PATCH 1/2] options: change default path to current dir
+
+---
+ src/OptionHandlerFactory.cc | 2 +-
+ src/util.cc                 | 8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
+index 6f352cd4..79705aab 100644
+--- a/src/OptionHandlerFactory.cc
++++ b/src/OptionHandlerFactory.cc
+@@ -1276,7 +1276,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+   }
+   {
+     OptionHandler* op(new LocalFilePathOptionHandler(
+-        PREF_NETRC_PATH, TEXT_NETRC_PATH, util::getHomeDir() + "/.netrc",
++        PREF_NETRC_PATH, TEXT_NETRC_PATH, File::getCurrentDir() + "/.netrc",
+         /* acceptStdin = */ false, 0, /* mustExist = */ false));
+     handlers.push_back(op);
+   }
+diff --git a/src/util.cc b/src/util.cc
+index 40fc55f2..71f9cc0b 100644
+--- a/src/util.cc
++++ b/src/util.cc
+@@ -1452,9 +1452,9 @@ std::string getXDGDir(const std::string& environmentVariable,
+ 
+ std::string getConfigFile()
+ {
+-  std::string filename = getHomeDir() + "/.aria2/aria2.conf";
++  std::string filename = File::getCurrentDir() + "/.aria2/aria2.conf";
+   if (!File(filename).exists()) {
+-    filename = getXDGDir("XDG_CONFIG_HOME", getHomeDir() + "/.config") +
++    filename = getXDGDir("XDG_CONFIG_HOME", File::getCurrentDir() + "/.config") +
+                "/aria2/aria2.conf";
+   }
+   return filename;
+@@ -1463,9 +1463,9 @@ std::string getConfigFile()
+ std::string getDHTFile(bool ipv6)
+ {
+   std::string filename =
+-      getHomeDir() + (ipv6 ? "/.aria2/dht6.dat" : "/.aria2/dht.dat");
++      File::getCurrentDir() + (ipv6 ? "/.aria2/dht6.dat" : "/.aria2/dht.dat");
+   if (!File(filename).exists()) {
+-    filename = getXDGDir("XDG_CACHE_HOME", getHomeDir() + "/.cache") +
++    filename = getXDGDir("XDG_CACHE_HOME", File::getCurrentDir() + "/.cache") +
+                (ipv6 ? "/aria2/dht6.dat" : "/aria2/dht.dat");
+   }
+   return filename;
+-- 
+2.12.1
+

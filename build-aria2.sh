@@ -109,7 +109,7 @@ rm -rf "libssh2-${ssh_ver}"
 
 git clone https://github.com/aria2/aria2 --depth=1
 cd aria2
-patch -Np1 <../aria2.diff
+git am ../aria2-*.patch
 autoreconf -i
 ./configure \
     --host=$HOST \
