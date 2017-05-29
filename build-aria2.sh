@@ -10,6 +10,10 @@ MINGW64)
     ;;
 esac
 
+# workaround for appveyor
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
 pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-toolchain $MINGW_PACKAGE_PREFIX-expat $MINGW_PACKAGE_PREFIX-gmp $MINGW_PACKAGE_PREFIX-c-ares
 
 PREFIX=/usr/local/$HOST
