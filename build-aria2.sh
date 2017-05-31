@@ -56,7 +56,7 @@ cd ..
 rm -rf expat-2.2.0
 
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3180000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3190200.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -77,7 +77,7 @@ rm -rf "${sqlite_name}"
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 cares_ver="${cares_ver:-1.12.0}"
 echo "c-ares-${cares_ver}"
-wget --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
+wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" && \
 ./configure \
@@ -96,7 +96,7 @@ rm -rf "c-ares-${cares_ver}"
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
 ssh_ver="${ssh_ver:-1.8.0}"
 echo "${ssh_ver}"
-wget --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
+wget -c --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}"
 ./configure \
