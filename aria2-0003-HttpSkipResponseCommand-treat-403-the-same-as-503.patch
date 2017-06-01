@@ -1,0 +1,24 @@
+From d0092e963c84192f34aedbaf97f71a71118154b0 Mon Sep 17 00:00:00 2001
+From: myfreeer <myfreeer@users.noreply.github.com>
+Date: Thu, 1 Jun 2017 18:49:28 +0800
+Subject: [PATCH] HttpSkipResponseCommand: treat 403 the same as 503
+
+---
+ src/HttpSkipResponseCommand.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/HttpSkipResponseCommand.cc b/src/HttpSkipResponseCommand.cc
+index 14bd37d4..cab3d582 100644
+--- a/src/HttpSkipResponseCommand.cc
++++ b/src/HttpSkipResponseCommand.cc
+@@ -220,6 +220,7 @@ bool HttpSkipResponseCommand::processResponse()
+       }
+       throw DL_RETRY_EX2(MSG_RESOURCE_NOT_FOUND,
+                          error_code::RESOURCE_NOT_FOUND);
++    case 403:
+     case 503:
+       // Only retry if pretry-wait > 0. Hammering 'busy' server is not
+       // a good idea.
+-- 
+2.12.1
+
