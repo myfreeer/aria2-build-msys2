@@ -43,9 +43,10 @@ get_last_version() {
     echo "$ret"
 }
 
-wget -c --no-check-certificate https://downloads.sourceforge.net/project/expat/expat/2.2.0/expat-2.2.0.tar.bz2
-tar xf expat-2.2.0.tar.bz2
-cd expat-2.2.0
+expat_ver=2.2.1
+wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
+tar xf "expat-${expat_ver}.tar.bz2"
+cd "expat-${expat_ver}"
 ./configure \
     --disable-shared \
     --enable-static \
@@ -53,7 +54,7 @@ cd expat-2.2.0
     --host=$HOST
 make install -j$CPUCOUNT
 cd ..
-rm -rf expat-2.2.0
+rm -rf "expat-${expat_ver}"
 
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
 [[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3190200.tar.gz"
