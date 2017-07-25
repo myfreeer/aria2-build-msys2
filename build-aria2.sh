@@ -45,7 +45,7 @@ get_last_version() {
 
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.2.1}"
+expat_ver="${expat_ver:-2.2.2}"
 wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}"
