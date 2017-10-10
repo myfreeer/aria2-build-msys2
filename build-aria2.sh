@@ -46,7 +46,7 @@ get_last_version() {
 
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.2.3}"
+expat_ver="${expat_ver:-2.2.4}"
 wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}"
@@ -60,7 +60,7 @@ cd ..
 rm -rf "expat-${expat_ver}"
 
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3200000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2017/sqlite-autoconf-3200100.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -115,7 +115,7 @@ make install -j$CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
 
-git clone https://github.com/aria2/aria2 --depth=1
+git clone https://github.com/aria2/aria2 --depth=1 --config http.sslVerify=false
 cd aria2
 git am ../aria2-*.patch
 autoreconf -i
