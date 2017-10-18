@@ -1,18 +1,26 @@
 version: 1.0.{build}
 install:
+- ps: >-
+    $gitData = ConvertFrom-StringData (git log -1 --format=format:"commitId=%H%nmessage=%s%ncommitted=%aD" | out-string)
+
+    if ($gitData['message'] -eq "") { $gitData['message'] = "No commit message available for $($gitData['commitid'])" }
+
+    # View the data with Write-Output @gitData
+
+    Update-AppveyorBuild @gitData
+build_script:
 - cmd: >-
     C:\msys64\usr\bin\pacman -Syyuu --noconfirm
 
     C:\msys64\usr\bin\pacman -Suu --noconfirm
 
     C:\msys64\usr\bin\pacman -S --noconfirm --needed base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel
-build_script:
-- cmd: >-
+
     set MSYSTEM=MINGW64
 
     C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./build-aria2.sh"
 
-    7z a aria2c.7z aria2\src\aria2c.exe
+    7z a aria2c.7z .\aria2\src\aria2c.exe
 
     appveyor PushArtifact aria2c.7z
 
@@ -22,7 +30,7 @@ build_script:
 
     C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./build-aria2.sh"
 
-    7z a aria2c_x86.7z aria2\src\aria2c.exe
+    7z a aria2c_x86.7z .\aria2\src\aria2c.exe
 
     appveyor PushArtifact aria2c_x86.7z
 test: off
