@@ -77,9 +77,9 @@ cd ..
 rm -rf "${sqlite_name}"
 
 [[ ! "$cares_ver" ]] &&
-    cares_ver="$(clean_html_index https://c-ares.haxx.se/download/)" &&
+    cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
-cares_ver="${cares_ver:-1.12.0}"
+cares_ver="${cares_ver:-1.13.0}"
 echo "c-ares-${cares_ver}"
 wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
