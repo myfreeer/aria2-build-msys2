@@ -11,8 +11,8 @@ MINGW64)
 esac
 
 # workaround for appveyor
-git config --global user.email "myfreeer@users.noreply.github.com"
-git config --global user.name "myfreeer"
+git config --global user.email "you@example.com"
+git config --global user.name "You"
 
 pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-toolchain \
     $MINGW_PACKAGE_PREFIX-expat $MINGW_PACKAGE_PREFIX-gmp $MINGW_PACKAGE_PREFIX-c-ares
@@ -122,10 +122,6 @@ git am ../aria2-*.patch
 # Bump up version number to 1.33.1
 wget https://github.com/aria2/aria2/commit/b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
 git am b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
-
-# workaround for building on msys2 after commit 983e222c62085483bfcf910c4886669d00873a7f
-git fetch --unshallow
-git revert -n dd60bba5adce136582626a8fb200fef7d630e241
 
 autoreconf -fi
 ./configure \
