@@ -1,12 +1,14 @@
-From 8db784ee031c5e552740c9bca8d47a1591432e4f Mon Sep 17 00:00:00 2001
+From 7e4a9461e83ff802e3e834e72039ed8b0703e24d Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
-Date: Fri, 17 Nov 2017 21:53:21 +0800
-Subject: [PATCH] download: retry on slow speed and reset
+Date: Sat, 18 Nov 2017 11:55:04 +0800
+Subject: [PATCH] download: retry on slow speed and conection close
 
+This would provide better speed on bad network conditions
 ---
  src/DownloadCommand.cc | 2 +-
  src/SocketBuffer.cc    | 3 ++-
- 2 files changed, 3 insertions(+), 2 deletions(-)
+ src/SocketCore.cc      | 2 +-
+ 3 files changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/src/DownloadCommand.cc b/src/DownloadCommand.cc
 index 91042ef..f777dec 100644
@@ -42,6 +44,19 @@ index 62862ff..1906173 100644
      }
      // A2_LOG_NOTICE(fmt("num=%zu, amount=%d, bufq.size()=%zu, SEND=%d",
      //                   num, amount, bufq_.size(), slen));
+diff --git a/src/SocketCore.cc b/src/SocketCore.cc
+index d0a205f..79a90a3 100644
+--- a/src/SocketCore.cc
++++ b/src/SocketCore.cc
+@@ -1009,7 +1009,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
+ 
+     if (rv == TLS_ERR_ERROR) {
+       // Damn those error.
+-      throw DL_ABORT_EX(fmt("SSL/TLS handshake failure: %s",
++      throw DL_RETRY_EX(fmt("SSL/TLS handshake failure: %s",
+                             handshakeError.empty()
+                                 ? tlsSession_->getLastErrorString().c_str()
+                                 : handshakeError.c_str()));
 -- 
 2.14.2
 
