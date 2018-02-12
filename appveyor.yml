@@ -10,11 +10,11 @@ install:
     Update-AppveyorBuild @gitData
 build_script:
 - cmd: >-
-    C:\msys64\usr\bin\pacman -Syyuu --noconfirm
+    C:\msys64\usr\bin\pacman -Syyuu --noconfirm --ask 20
 
-    C:\msys64\usr\bin\pacman -Suu --noconfirm
+    C:\msys64\usr\bin\pacman -Suu --noconfirm --ask 20
 
-    C:\msys64\usr\bin\pacman -S --noconfirm --needed base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel
+    C:\msys64\usr\bin\pacman -S --noconfirm --needed --ask 20 base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel
 
     set MSYSTEM=MINGW64
 
