@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: 1.33.1-{build}
 install:
 - ps: >-
     $gitData = ConvertFrom-StringData (git log -1 --format=format:"commitId=%H%nmessage=%s%ncommitted=%aD" | out-string)
