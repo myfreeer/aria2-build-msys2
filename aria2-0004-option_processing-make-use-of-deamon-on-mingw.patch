@@ -1,0 +1,44 @@
+From a3f4773f34a61b00d339f69afc358e5ae03270cd Mon Sep 17 00:00:00 2001
+From: myfreeer <myfreeer@users.noreply.github.com>
+Date: Wed, 28 Mar 2018 17:35:19 +0800
+Subject: [PATCH] option_processing: make use of --deamon on mingw
+
+This commit uses FreeConsole() to be daemonized on windows,
+which would detach program from current console,
+aria2c would run in background even if the console
+called it being ended, and if aria2c being called by
+start aria2c --deamon arguments
+the black console window would close soon after luanched
+---
+ src/option_processing.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/option_processing.cc b/src/option_processing.cc
+index 652a3bd..ea9f0d4 100644
+--- a/src/option_processing.cc
++++ b/src/option_processing.cc
+@@ -319,6 +319,13 @@ error_code::Value option_processing(Option& op, bool standalone,
+     }
+   }
+   if (standalone && op.getAsBool(PREF_DAEMON)) {
++#ifdef __MINGW32__
++    const auto daemonized = FreeConsole();
++    if (daemonized == 0) {
++      perror(MSG_DAEMON_FAILED);
++      return error_code::UNKNOWN_ERROR;
++    }
++#else  // !__MINGW32__
+ #if defined(__GNUC__) && defined(__APPLE__)
+ // daemon() is deprecated on OSX since... forever.
+ // Silence the warning for good, so that -Werror becomes feasible.
+@@ -334,6 +341,7 @@ error_code::Value option_processing(Option& op, bool standalone,
+       perror(MSG_DAEMON_FAILED);
+       return error_code::UNKNOWN_ERROR;
+     }
++#endif // __MINGW32__
+   }
+   if (op.getAsBool(PREF_DEFERRED_INPUT) && op.defined(PREF_SAVE_SESSION)) {
+     A2_LOG_WARN("--deferred-input is disabled because of the presence of "
+-- 
+2.16.2
+

@@ -161,7 +161,7 @@ git am ../aria2-*.patch
 wget https://github.com/aria2/aria2/commit/b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
 git am b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
 
-autoreconf -fi
+autoreconf -fi || autoreconf -fiv
 ./configure \
     --host=$HOST \
     --prefix=$PREFIX \

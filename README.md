@@ -17,6 +17,7 @@ aria2 build scripts for `msys2` with custom patches.
 * option `retry-wait`: change default value to `1`
 * option `max-concurrent-downloads`: change default value to `16`
 * option `netrc-path` `conf-path` `dht-file-path` `dht-file-path6`: change default value to sub-folder of current directory
+* option `deamon`: make use of it on mingw
 * download: retry on slow speed and connection close
 
 ### Environment 
@@ -24,10 +25,11 @@ aria2 build scripts for `msys2` with custom patches.
 Should be set up with commands below:
 ```sh
 pacman -Syyuu --noconfirm
+pacman -Su --noconfirm
 pacman -S --noconfirm --needed base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel
 ```
 
-### Artifacts 
+### Artifacts
 * x86_64 (64-bits) version: [![aria2c.7z](https://img.shields.io/badge/download-aria2c.7z-brightgreen.svg)](https://ci.appveyor.com/api/projects/myfreeer/aria2-build-msys2/artifacts/aria2c.7z)
 * x86 (32-bits) version: [![aria2c_x86.7z](https://img.shields.io/badge/download-aria2c_x86.7z-brightgreen.svg)](https://ci.appveyor.com/api/projects/myfreeer/aria2-build-msys2/artifacts/aria2c_x86.7z)
 
