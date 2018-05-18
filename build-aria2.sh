@@ -71,7 +71,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "http://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2018/sqlite-autoconf-3220000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2018/sqlite-autoconf-3230100.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "http://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -156,10 +156,6 @@ else
 fi
 git checkout -b patch
 git am ../aria2-*.patch
-
-# aria2: Bump up version number to 1.33.1
-wget https://github.com/aria2/aria2/commit/b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
-git am b9d74ca88bb8d8c53ccbfc7e95e05f9e2a155455.patch
 
 autoreconf -fi || autoreconf -fiv
 ./configure \
