@@ -128,23 +128,6 @@ make install -j$CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
 
-# jemalloc: probably have better performance
-if [[ -d jemalloc ]]; then
-    cd jemalloc
-    git checkout master
-    git reset --hard
-    git pull
-else
-    git clone https://github.com/jemalloc/jemalloc.git jemalloc --depth=1 --config http.sslVerify=false
-    cd jemalloc
-fi
-./autogen.sh \
-    --disable-stats \
-    --prefix=/usr/local/$HOST \
-    --host=$HOST
-make install_include install_lib_static install_lib_pc -j$CPUCOUNT
-cd ..
-
 if [[ -d aria2 ]]; then
     cd aria2
     git checkout master
@@ -172,7 +155,6 @@ autoreconf -fi || autoreconf -fiv
     --with-libz \
     --with-libgmp \
     --with-libssh2 \
-    --with-jemalloc \
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
@@ -183,5 +165,5 @@ autoreconf -fi || autoreconf -fiv
 make -j$CPUCOUNT
 strip -s src/aria2c.exe
 git checkout master
-git branch patch --delete
+git branch patch -D
 cd ..
