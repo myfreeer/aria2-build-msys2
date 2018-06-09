@@ -1,7 +1,7 @@
-From 1b7fec7ade79f2423ecfef7efd4b2ae7554022fa Mon Sep 17 00:00:00 2001
+From c33446e390e8d4fc79d69031d391eaf12dce1766 Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
 Date: Tue, 5 Jun 2018 16:49:07 +0800
-Subject: [PATCH] options: change default path to current dir
+Subject: [PATCH 1/4] options: change default path to current dir
 
 and try to load config files in current dir if exists
 ---
@@ -11,7 +11,7 @@ and try to load config files in current dir if exists
  3 files changed, 12 insertions(+), 6 deletions(-)
 
 diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
-index 4339c91..dbfe29e 100644
+index 3d76d33..cd00881 100644
 --- a/src/OptionHandlerFactory.cc
 +++ b/src/OptionHandlerFactory.cc
 @@ -1276,7 +1276,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
@@ -37,7 +37,7 @@ index 6214e84..7f89226 100644
        File f(path);
        std::string err;
 diff --git a/src/util.cc b/src/util.cc
-index be73a6e..4d50eaf 100644
+index 2e700de..cc2531d 100644
 --- a/src/util.cc
 +++ b/src/util.cc
 @@ -1805,9 +1805,12 @@ std::string getXDGDir(const std::string& environmentVariable,
@@ -71,5 +71,5 @@ index be73a6e..4d50eaf 100644
    }
    return filename;
 -- 
-2.17.0
+2.17.1
 

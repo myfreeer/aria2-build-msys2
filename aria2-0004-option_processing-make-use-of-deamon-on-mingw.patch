@@ -1,14 +1,14 @@
-From fc988aa01b850c466d94f047af2b979affc9efaa Mon Sep 17 00:00:00 2001
+From 26816f5deb196c7000244b56edd55b17385381db Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
 Date: Sat, 9 Jun 2018 15:24:29 +0800
-Subject: [PATCH] option_processing: make use of --deamon on mingw
+Subject: [PATCH 4/4] option_processing: make use of --deamon on mingw
 
 ---
  src/option_processing.cc | 17 +++++++++++++++++
  1 file changed, 17 insertions(+)
 
 diff --git a/src/option_processing.cc b/src/option_processing.cc
-index 652a3bd..f86efd4 100644
+index f9891fe..3952ed6 100644
 --- a/src/option_processing.cc
 +++ b/src/option_processing.cc
 @@ -319,6 +319,22 @@ error_code::Value option_processing(Option& op, bool standalone,

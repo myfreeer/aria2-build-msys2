@@ -1,7 +1,7 @@
-From 7e4a9461e83ff802e3e834e72039ed8b0703e24d Mon Sep 17 00:00:00 2001
+From 66524bee738e98742c908d93c993d0a78a2d9891 Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
 Date: Sat, 18 Nov 2017 11:55:04 +0800
-Subject: [PATCH] download: retry on slow speed and conection close
+Subject: [PATCH 3/4] download: retry on slow speed and conection close
 
 This would provide better speed on bad network conditions
 ---
@@ -11,7 +11,7 @@ This would provide better speed on bad network conditions
  3 files changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/src/DownloadCommand.cc b/src/DownloadCommand.cc
-index 91042ef..f777dec 100644
+index 2db41e4..f49eb80 100644
 --- a/src/DownloadCommand.cc
 +++ b/src/DownloadCommand.cc
 @@ -306,7 +306,7 @@ void DownloadCommand::checkLowestDownloadSpeed() const
@@ -45,7 +45,7 @@ index 62862ff..1906173 100644
      // A2_LOG_NOTICE(fmt("num=%zu, amount=%d, bufq.size()=%zu, SEND=%d",
      //                   num, amount, bufq_.size(), slen));
 diff --git a/src/SocketCore.cc b/src/SocketCore.cc
-index d0a205f..79a90a3 100644
+index 77dc30c..537375a 100644
 --- a/src/SocketCore.cc
 +++ b/src/SocketCore.cc
 @@ -1009,7 +1009,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
@@ -58,5 +58,5 @@ index d0a205f..79a90a3 100644
                                  ? tlsSession_->getLastErrorString().c_str()
                                  : handshakeError.c_str()));
 -- 
-2.14.2
+2.17.1
 
