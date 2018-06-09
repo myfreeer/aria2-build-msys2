@@ -1,62 +1,40 @@
-From 4e519234c15aa3380ed8effbedb08aba130af9c9 Mon Sep 17 00:00:00 2001
+From fc988aa01b850c466d94f047af2b979affc9efaa Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
-Date: Tue, 22 May 2018 13:35:32 +0800
+Date: Sat, 9 Jun 2018 15:24:29 +0800
 Subject: [PATCH] option_processing: make use of --deamon on mingw
 
 ---
- src/OptionHandlerFactory.cc |  6 ++++++
- src/option_processing.cc    | 19 +++++++++++++++++++
- src/prefs.cc                |  2 ++
- src/prefs.h                 |  2 ++
- 4 files changed, 29 insertions(+)
+ src/option_processing.cc | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
-index 4339c91..86475ce 100644
---- a/src/OptionHandlerFactory.cc
-+++ b/src/OptionHandlerFactory.cc
-@@ -173,6 +173,12 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
-     op->addTag(TAG_ADVANCED);
-     handlers.push_back(op);
-   }
-+  {
-+    OptionHandler* op(new BooleanOptionHandler(
-+        PREF_NO_DAEMON, "", A2_V_FALSE, OptionHandler::OPT_ARG, 0));
-+    op->addTag(TAG_ADVANCED);
-+    handlers.push_back(op);
-+  }
-   {
-     OptionHandler* op(new UnitNumberOptionHandler(PREF_DISK_CACHE,
-                                                   TEXT_DISK_CACHE,
 diff --git a/src/option_processing.cc b/src/option_processing.cc
-index 652a3bd..b026c29 100644
+index 652a3bd..f86efd4 100644
 --- a/src/option_processing.cc
 +++ b/src/option_processing.cc
-@@ -319,6 +319,24 @@ error_code::Value option_processing(Option& op, bool standalone,
+@@ -319,6 +319,22 @@ error_code::Value option_processing(Option& op, bool standalone,
      }
    }
    if (standalone && op.getAsBool(PREF_DAEMON)) {
 +#ifdef __MINGW32__
-+    if (!op.getAsBool(PREF_NO_DAEMON)) {
-+      std::wstring daemonCmdLine = GetCommandLineW();
-+      daemonCmdLine.append(L" --no-daemon");
-+      STARTUPINFOW si = {};
-+      PROCESS_INFORMATION pi = {};
-+      si.dwFlags = STARTF_USESHOWWINDOW;
-+      si.wShowWindow = FALSE;
-+      BOOL bRet = CreateProcessW(
-+        NULL, const_cast<LPWSTR>(daemonCmdLine.c_str()), NULL, NULL,
-+        FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-+      if (bRet) {
-+        CloseHandle(pi.hThread);
-+        CloseHandle(pi.hProcess);
-+        ExitProcess(0);
-+      }
++    std::wstring daemonCmdLine = GetCommandLineW();
++    daemonCmdLine.append(L" --daemon=false");
++    STARTUPINFOW si = {};
++    PROCESS_INFORMATION pi = {};
++    si.dwFlags = STARTF_USESHOWWINDOW;
++    si.wShowWindow = FALSE;
++    BOOL bRet = CreateProcessW(
++      NULL, const_cast<LPWSTR>(daemonCmdLine.c_str()), NULL, NULL,
++      FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
++    if (bRet) {
++      CloseHandle(pi.hThread);
++      CloseHandle(pi.hProcess);
++      ExitProcess(0);
 +    }
 +#else // !__MINGW32__
  #if defined(__GNUC__) && defined(__APPLE__)
  // daemon() is deprecated on OSX since... forever.
  // Silence the warning for good, so that -Werror becomes feasible.
-@@ -334,6 +352,7 @@ error_code::Value option_processing(Option& op, bool standalone,
+@@ -334,6 +350,7 @@ error_code::Value option_processing(Option& op, bool standalone,
        perror(MSG_DAEMON_FAILED);
        return error_code::UNKNOWN_ERROR;
      }
@@ -64,32 +42,6 @@ index 652a3bd..b026c29 100644
    }
    if (op.getAsBool(PREF_DEFERRED_INPUT) && op.defined(PREF_SAVE_SESSION)) {
      A2_LOG_WARN("--deferred-input is disabled because of the presence of "
-diff --git a/src/prefs.cc b/src/prefs.cc
-index 937e927..7ebe208 100644
---- a/src/prefs.cc
-+++ b/src/prefs.cc
-@@ -181,6 +181,8 @@ PrefPtr PREF_OUT = makePref("out");
- PrefPtr PREF_SPLIT = makePref("split");
- // value: true | false
- PrefPtr PREF_DAEMON = makePref("daemon");
-+// value: true | false
-+PrefPtr PREF_NO_DAEMON = makePref("no-daemon");
- // value: a string
- PrefPtr PREF_REFERER = makePref("referer");
- // value: 1*digit
-diff --git a/src/prefs.h b/src/prefs.h
-index e1f8397..bbaf753 100644
---- a/src/prefs.h
-+++ b/src/prefs.h
-@@ -138,6 +138,8 @@ extern PrefPtr PREF_OUT;
- extern PrefPtr PREF_SPLIT;
- // value: true | false
- extern PrefPtr PREF_DAEMON;
-+// value: true | false
-+extern PrefPtr PREF_NO_DAEMON;
- // value: a string
- extern PrefPtr PREF_REFERER;
- // value: 1*digit
 -- 
-2.17.0
+2.17.1
 
