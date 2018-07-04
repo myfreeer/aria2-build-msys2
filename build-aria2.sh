@@ -131,14 +131,14 @@ rm -rf "libssh2-${ssh_ver}"
 if [[ -d aria2 ]]; then
     cd aria2
     git checkout master
-    git reset --hard
+    git reset --hard origin || git reset --hard
     git pull
 else
     git clone https://github.com/aria2/aria2 --depth=1 --config http.sslVerify=false
     cd aria2
 fi
 git checkout -b patch
-git am ../aria2-*.patch
+git am -3 ../aria2-*.patch
 
 autoreconf -fi || autoreconf -fiv
 ./configure \
@@ -160,7 +160,7 @@ autoreconf -fi || autoreconf -fiv
     --with-cppunit-prefix=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib" \
+    LDFLAGS="-L$PREFIX/lib -Wl,--gc-sections,--build-id=none" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$CPUCOUNT
 strip -s src/aria2c.exe
