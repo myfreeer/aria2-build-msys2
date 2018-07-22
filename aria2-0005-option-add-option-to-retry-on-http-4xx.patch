@@ -1,18 +1,49 @@
-From ecf122a0967a16077d3fb8e660ab8ddf294e7db3 Mon Sep 17 00:00:00 2001
+From 8adbc01dc5975a64c55fe594d8c758c71e8183b3 Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
-Date: Thu, 19 Jul 2018 16:25:30 +0800
-Subject: [PATCH] option: add option to retry on http 400 or 403
+Date: Sun, 22 Jul 2018 19:59:02 +0800
+Subject: [PATCH] option: add option to retry on http 400, 403, 406, or unknown
 
+ --retry-on-400[=true|false]  Configure whether retry or not when
+                              HTTP server returns 400 Bad Request.
+                              Only effective if retry-wait > 0.
+
+                              Possible Values: true, false
+                              Default: false
+                              Tags: #advanced, #http
+
+ --retry-on-403[=true|false]  Configure whether retry or not when
+                              HTTP server returns 403 Forbidden.
+                              Only effective if retry-wait > 0.
+
+                              Possible Values: true, false
+                              Default: false
+                              Tags: #advanced, #http
+
+ --retry-on-406[=true|false]  Configure whether retry or not when
+                              HTTP server returns 406 Not Acceptable.
+                              Only effective if retry-wait > 0.
+
+                              Possible Values: true, false
+                              Default: false
+                              Tags: #advanced, #http
+
+ --retry-on-unknown[=true|false] Configure whether retry or not when
+                              HTTP server returns unknown status code.
+                              Only effective if retry-wait > 0.
+
+                              Possible Values: true, false
+                              Default: false
+                              Tags: #advanced, #http
 ---
- src/HttpSkipResponseCommand.cc | 29 ++++++++++++++++++++++++-----
- src/OptionHandlerFactory.cc    | 20 ++++++++++++++++++++
- src/prefs.cc                   |  4 ++++
- src/prefs.h                    |  4 ++++
- src/usage_text.h               |  8 ++++++++
- 5 files changed, 60 insertions(+), 5 deletions(-)
+ src/HttpSkipResponseCommand.cc | 42 +++++++++++++++++++++++++++++-----
+ src/OptionHandlerFactory.cc    | 40 ++++++++++++++++++++++++++++++++
+ src/prefs.cc                   |  8 +++++++
+ src/prefs.h                    |  8 +++++++
+ src/usage_text.h               | 16 +++++++++++++
+ 5 files changed, 108 insertions(+), 6 deletions(-)
 
 diff --git a/src/HttpSkipResponseCommand.cc b/src/HttpSkipResponseCommand.cc
-index a722d77..47783d8 100644
+index a722d77..de4ad6c 100644
 --- a/src/HttpSkipResponseCommand.cc
 +++ b/src/HttpSkipResponseCommand.cc
 @@ -204,7 +204,7 @@ bool HttpSkipResponseCommand::processResponse()
@@ -24,7 +55,7 @@ index a722d77..47783d8 100644
        if (getOption()->getAsBool(PREF_HTTP_AUTH_CHALLENGE) &&
            !httpResponse_->getHttpRequest()->authenticationUsed() &&
            getDownloadEngine()->getAuthConfigFactory()->activateBasicCred(
-@@ -213,15 +213,34 @@ bool HttpSkipResponseCommand::processResponse()
+@@ -213,15 +213,41 @@ bool HttpSkipResponseCommand::processResponse()
          return prepareForRetry(0);
        }
        throw DL_ABORT_EX2(EX_AUTH_FAILED, error_code::HTTP_AUTH_FAILED);
@@ -52,6 +83,13 @@ index a722d77..47783d8 100644
 +                          error_code::HTTP_PROTOCOL_ERROR);
 +      }
 +      break;
++    case 406: // Not Acceptable
++      if (getOption()->getAsBool(PREF_RETRY_ON_406)
++          && getOption()->getAsInt(PREF_RETRY_WAIT) > 0) {
++        throw DL_RETRY_EX2(fmt(EX_BAD_STATUS, statusCode),
++                          error_code::HTTP_PROTOCOL_ERROR);
++      }
++      break;
 +    case 408: // Request Timeout
 +    case 429: // Too Many Requests
 +    case 502: // Bad Gateway
@@ -62,7 +100,7 @@ index a722d77..47783d8 100644
        // Only retry if pretry-wait > 0. Hammering 'busy' server is not
        // a good idea.
        if (getOption()->getAsInt(PREF_RETRY_WAIT) > 0) {
-@@ -230,7 +249,7 @@ bool HttpSkipResponseCommand::processResponse()
+@@ -230,12 +256,16 @@ bool HttpSkipResponseCommand::processResponse()
        }
        throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, statusCode),
                           error_code::HTTP_SERVICE_UNAVAILABLE);
@@ -71,11 +109,21 @@ index a722d77..47783d8 100644
        // This is Gateway Timeout, so try again
        throw DL_RETRY_EX2(fmt(EX_BAD_STATUS, statusCode),
                           error_code::HTTP_SERVICE_UNAVAILABLE);
+     };
+-
++    if (getOption()->getAsBool(PREF_RETRY_ON_UNKNOWN)
++        && getOption()->getAsInt(PREF_RETRY_WAIT) > 0) {
++      throw DL_RETRY_EX2(fmt(EX_BAD_STATUS, statusCode),
++                        error_code::HTTP_PROTOCOL_ERROR);
++    }
+     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, statusCode),
+                        error_code::HTTP_PROTOCOL_ERROR);
+   }
 diff --git a/src/OptionHandlerFactory.cc b/src/OptionHandlerFactory.cc
-index 5768f7b..79ce477 100644
+index 5768f7b..decb03e 100644
 --- a/src/OptionHandlerFactory.cc
 +++ b/src/OptionHandlerFactory.cc
-@@ -934,6 +934,26 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
+@@ -934,6 +934,46 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
      op->setChangeOptionForReserved(true);
      handlers.push_back(op);
    }
@@ -99,14 +147,34 @@ index 5768f7b..79ce477 100644
 +    op->setChangeOptionForReserved(true);
 +    handlers.push_back(op);
 +  }
++  {
++    OptionHandler* op(new BooleanOptionHandler(
++        PREF_RETRY_ON_406, TEXT_RETRY_ON_406, A2_V_FALSE, OptionHandler::OPT_ARG));
++    op->addTag(TAG_ADVANCED);
++    op->addTag(TAG_HTTP);
++    op->setInitialOption(true);
++    op->setChangeGlobalOption(true);
++    op->setChangeOptionForReserved(true);
++    handlers.push_back(op);
++  }
++  {
++    OptionHandler* op(new BooleanOptionHandler(
++        PREF_RETRY_ON_UNKNOWN, TEXT_RETRY_ON_UNKNOWN, A2_V_FALSE, OptionHandler::OPT_ARG));
++    op->addTag(TAG_ADVANCED);
++    op->addTag(TAG_HTTP);
++    op->setInitialOption(true);
++    op->setChangeGlobalOption(true);
++    op->setChangeOptionForReserved(true);
++    handlers.push_back(op);
++  }
    {
      OptionHandler* op(new BooleanOptionHandler(
          PREF_REUSE_URI, TEXT_REUSE_URI, A2_V_TRUE, OptionHandler::OPT_ARG));
 diff --git a/src/prefs.cc b/src/prefs.cc
-index 937e927..76d27b9 100644
+index 937e927..33eff91 100644
 --- a/src/prefs.cc
 +++ b/src/prefs.cc
-@@ -327,6 +327,10 @@ PrefPtr PREF_ENABLE_ASYNC_DNS6 = makePref("enable-async-dns6");
+@@ -327,6 +327,14 @@ PrefPtr PREF_ENABLE_ASYNC_DNS6 = makePref("enable-async-dns6");
  PrefPtr PREF_MAX_DOWNLOAD_RESULT = makePref("max-download-result");
  // value: 1*digit
  PrefPtr PREF_RETRY_WAIT = makePref("retry-wait");
@@ -114,14 +182,18 @@ index 937e927..76d27b9 100644
 +PrefPtr PREF_RETRY_ON_400 = makePref("retry-on-400");
 +// value: true | false
 +PrefPtr PREF_RETRY_ON_403 = makePref("retry-on-403");
++// value: true | false
++PrefPtr PREF_RETRY_ON_406 = makePref("retry-on-406");
++// value: true | false
++PrefPtr PREF_RETRY_ON_UNKNOWN = makePref("retry-on-unknown");
  // value: string
  PrefPtr PREF_ASYNC_DNS_SERVER = makePref("async-dns-server");
  // value: true | false
 diff --git a/src/prefs.h b/src/prefs.h
-index e1f8397..9e97c95 100644
+index e1f8397..019e774 100644
 --- a/src/prefs.h
 +++ b/src/prefs.h
-@@ -280,6 +280,10 @@ extern PrefPtr PREF_ENABLE_ASYNC_DNS6;
+@@ -280,6 +280,14 @@ extern PrefPtr PREF_ENABLE_ASYNC_DNS6;
  extern PrefPtr PREF_MAX_DOWNLOAD_RESULT;
  // value: 1*digit
  extern PrefPtr PREF_RETRY_WAIT;
@@ -129,24 +201,36 @@ index e1f8397..9e97c95 100644
 +extern PrefPtr PREF_RETRY_ON_400;
 +// value: true | false
 +extern PrefPtr PREF_RETRY_ON_403;
++// value: true | false
++extern PrefPtr PREF_RETRY_ON_406;
++// value: true | false
++extern PrefPtr PREF_RETRY_ON_UNKNOWN;
  // value: string
  extern PrefPtr PREF_ASYNC_DNS_SERVER;
  // value: true | false
 diff --git a/src/usage_text.h b/src/usage_text.h
-index d73b50d..0e77a67 100644
+index d73b50d..75d34a0 100644
 --- a/src/usage_text.h
 +++ b/src/usage_text.h
-@@ -64,6 +64,14 @@
+@@ -64,6 +64,22 @@
    _(" --retry-wait=SEC             Set the seconds to wait between retries. \n" \
      "                              With SEC > 0, aria2 will retry download when the\n" \
      "                              HTTP server returns 503 response.")
 +#define TEXT_RETRY_ON_400                                                 \
 +  _(" --retry-on-400[=true|false]  Configure whether retry or not when\n" \
-+    "                              HTTP server returns 400 Bad Request\n" \
++    "                              HTTP server returns 400 Bad Request.\n" \
 +    "                              Only effective if retry-wait > 0.")
 +#define TEXT_RETRY_ON_403                                                 \
 +  _(" --retry-on-403[=true|false]  Configure whether retry or not when\n" \
-+    "                              HTTP server returns 403 Forbidden\n" \
++    "                              HTTP server returns 403 Forbidden.\n" \
++    "                              Only effective if retry-wait > 0.")
++#define TEXT_RETRY_ON_406                                                 \
++  _(" --retry-on-406[=true|false]  Configure whether retry or not when\n" \
++    "                              HTTP server returns 406 Not Acceptable.\n" \
++    "                              Only effective if retry-wait > 0.")
++#define TEXT_RETRY_ON_UNKNOWN                                                 \
++  _(" --retry-on-unknown[=true|false] Configure whether retry or not when\n" \
++    "                              HTTP server returns unknown status code.\n" \
 +    "                              Only effective if retry-wait > 0.")
  #define TEXT_TIMEOUT                                            \
    _(" -t, --timeout=SEC            Set timeout in seconds.")

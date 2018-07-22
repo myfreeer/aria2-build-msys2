@@ -21,6 +21,7 @@ aria2 build scripts for `msys2` with custom patches.
 * download: retry on slow speed and connection close
 * download: add option `retry-on-400` to retry on http 400 bad request, which only effective if retry-wait > 0
 * download: add option `retry-on-403` to retry on http 403 forbidden, which only effective if retry-wait > 0
+* download: add option `retry-on-406` to retry on http 406 not acceptable, which only effective if retry-wait > 0
 
 ### Environment 
 [MSYS2](http://www.msys2.org/)
