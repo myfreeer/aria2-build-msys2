@@ -35,3 +35,8 @@ build_script:
 
     appveyor PushArtifact aria2c_x86.7z
 test: off
+skip_commits:
+  files:
+    - 'LICENSE'
+    - '*.md'
+    - '.gitingore'
