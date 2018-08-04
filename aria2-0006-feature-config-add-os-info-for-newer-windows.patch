@@ -1,0 +1,95 @@
+From bd345e8911719cbc5b698323440f6324d7ebddb8 Mon Sep 17 00:00:00 2001
+From: myfreeer <myfreeer@users.noreply.github.com>
+Date: Sat, 4 Aug 2018 11:06:17 +0800
+Subject: [PATCH] FeatureConfig: add os info for newer windows
+
+---
+ src/FeatureConfig.cc | 65 ++++++++++++++++++++++++++++----------------
+ 1 file changed, 41 insertions(+), 24 deletions(-)
+
+diff --git a/src/FeatureConfig.cc b/src/FeatureConfig.cc
+index 2b43c8b..28efc8f 100644
+--- a/src/FeatureConfig.cc
++++ b/src/FeatureConfig.cc
+@@ -314,37 +314,54 @@ std::string getOperatingSystemInfo()
+     rv << "Legacy, probably XP";
+     return rv.str();
+   }
+-  switch (ovi.dwMinorVersion) {
+-  case 0:
+-    if (ovi.wProductType == VER_NT_WORKSTATION) {
++  DWORD dwVersion = (ovi.dwMajorVersion << 24U) | (ovi.dwMinorVersion << 8U) |
++                    ovi.wProductType;
++#define WIN32_VERSION(major, minor, type)                                      \
++    ((major##U << 24U) | (minor##U << 8U) | type)
++  switch (dwVersion) {
++  case WIN32_VERSION(6, 0, VER_NT_WORKSTATION):
+       rv << "Vista";
+-    }
+-    else {
++      break;
++  case WIN32_VERSION(6, 0, VER_NT_SERVER):
+       rv << "Server 2008";
+-    }
+-    break;
+-
+-  case 1:
+-    if (ovi.wProductType == VER_NT_WORKSTATION) {
++      break;
++  case WIN32_VERSION(6, 1, VER_NT_WORKSTATION):
+       rv << "7";
+-    }
+-    else {
++      break;
++  case WIN32_VERSION(6, 1, VER_NT_SERVER):
+       rv << "Server 2008 R2";
+-    }
+-    break;
+-
++      break;
++  case WIN32_VERSION(6, 2, VER_NT_WORKSTATION):
++      rv << "8";
++      break;
++  case WIN32_VERSION(6, 2, VER_NT_SERVER):
++      rv << "Server 2012";
++      break;
++  case WIN32_VERSION(6, 3, VER_NT_WORKSTATION):
++      rv << "8.1";
++      break;
++  case WIN32_VERSION(6, 3, VER_NT_SERVER):
++      rv << "Server 2012 R2";
++      break;
++  case WIN32_VERSION(10, 0, VER_NT_WORKSTATION):
++      rv << "10";
++      break;
++  case WIN32_VERSION(10, 0, VER_NT_SERVER):
++      rv << "Server 2016";
++      break;
+   default:
+-    // Windows above 6.2 does not actually say so. :p
++      // Windows above 6.2 does not actually say so. :p
+ 
+-    rv << ovi.dwMajorVersion;
+-    if (ovi.dwMinorVersion) {
+-      rv << "." << ovi.dwMinorVersion;
+-    }
+-    if (ovi.wProductType != VER_NT_WORKSTATION) {
+-      rv << " Server";
+-    }
+-    break;
++      rv << ovi.dwMajorVersion;
++      if (ovi.dwMinorVersion) {
++          rv << "." << ovi.dwMinorVersion;
++      }
++      if (ovi.wProductType != VER_NT_WORKSTATION) {
++          rv << " Server";
++      }
++      break;
+   }
++#undef WIN32_VERSION
+   if (ovi.szCSDVersion[0]) {
+     rv << " (" << ovi.szCSDVersion << ")";
+   }
+-- 
+2.18.0
+
