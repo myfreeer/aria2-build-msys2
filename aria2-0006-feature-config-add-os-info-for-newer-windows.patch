@@ -1,16 +1,44 @@
-From bd345e8911719cbc5b698323440f6324d7ebddb8 Mon Sep 17 00:00:00 2001
+From d36a15f8330057cee7c32b4035c8824bb03787af Mon Sep 17 00:00:00 2001
 From: myfreeer <myfreeer@users.noreply.github.com>
-Date: Sat, 4 Aug 2018 11:06:17 +0800
+Date: Fri, 10 Aug 2018 11:31:06 +0800
 Subject: [PATCH] FeatureConfig: add os info for newer windows
 
+getOperatingSystemInfo: partial refactor
+replace GetVersionEx with RtlGetVersion, and link with ntdll
 ---
- src/FeatureConfig.cc | 65 ++++++++++++++++++++++++++++----------------
- 1 file changed, 41 insertions(+), 24 deletions(-)
+ configure.ac         |  2 +-
+ src/FeatureConfig.cc | 69 +++++++++++++++++++++++++++-----------------
+ src/FeatureConfig.h  | 14 +++++++++
+ 3 files changed, 58 insertions(+), 27 deletions(-)
 
+diff --git a/configure.ac b/configure.ac
+index 1ab1d32..55c5c07 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -34,7 +34,7 @@ EXTRALIBS=
+ case "$host" in
+   *mingw*)
+     win_build=yes
+-    EXTRALIBS="-lws2_32 -lwsock32 -lgdi32 -lwinmm -liphlpapi -lpsapi $EXTRALIBS"
++    EXTRALIBS="-lws2_32 -lwsock32 -lgdi32 -lwinmm -liphlpapi -lpsapi -lntdll $EXTRALIBS"
+     # Define _POSIX_C_SOURCE to 1. This makes {asc,local}time_r
+     # available from <time.h> even without (un)helpful interference
+     # from <pthread.h>, and also defines __USE_MINGW_ANSI_STDIO.
 diff --git a/src/FeatureConfig.cc b/src/FeatureConfig.cc
-index 2b43c8b..28efc8f 100644
+index 2b43c8b..e477aa9 100644
 --- a/src/FeatureConfig.cc
 +++ b/src/FeatureConfig.cc
+@@ -305,8 +305,8 @@ std::string getOperatingSystemInfo()
+ #ifdef _WIN32
+   std::stringstream rv;
+   rv << "Windows ";
+-  OSVERSIONINFOEX ovi = {sizeof(OSVERSIONINFOEX)};
+-  if (!GetVersionEx((LPOSVERSIONINFO)&ovi)) {
++  RTL_OSVERSIONINFOEXW ovi = {sizeof(RTL_OSVERSIONINFOEXW)};
++  if (RtlGetVersion((PRTL_OSVERSIONINFOEXW)&ovi) != STATUS_SUCCESS) {
+     rv << "Unknown";
+     return rv.str();
+   }
 @@ -314,37 +314,54 @@ std::string getOperatingSystemInfo()
      rv << "Legacy, probably XP";
      return rv.str();
@@ -90,6 +118,29 @@ index 2b43c8b..28efc8f 100644
    if (ovi.szCSDVersion[0]) {
      rv << " (" << ovi.szCSDVersion << ")";
    }
+diff --git a/src/FeatureConfig.h b/src/FeatureConfig.h
+index 214dca2..55a3975 100644
+--- a/src/FeatureConfig.h
++++ b/src/FeatureConfig.h
+@@ -76,4 +76,18 @@ std::string getOperatingSystemInfo();
+ 
+ } // namespace aria2
+ 
++#ifdef _WIN32
++
++typedef LONG NTSTATUS;
++
++#ifndef STATUS_SUCCESS
++#define STATUS_SUCCESS   ((NTSTATUS)0x00000000L) // ntsubauth
++#endif
++
++extern "C" NTSYSAPI NTSTATUS NTAPI RtlGetVersion(
++    _Out_ PRTL_OSVERSIONINFOEXW lpVersionInformation
++);
++
++#endif // _WIN32
++
+ #endif // D_FEATURE_CONFIG_H
 -- 
 2.18.0
 
