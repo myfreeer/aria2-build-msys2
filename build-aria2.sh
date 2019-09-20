@@ -56,7 +56,7 @@ get_last_version() {
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.2.6}"
+expat_ver="${expat_ver:-2.2.8}"
 wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}"
@@ -71,7 +71,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2018/sqlite-autoconf-3250300.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2019/sqlite-autoconf-3290000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -111,7 +111,7 @@ rm -rf "c-ares-${cares_ver}"
 [[ ! "$ssh_ver" ]] &&
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
-ssh_ver="${ssh_ver:-1.8.0}"
+ssh_ver="${ssh_ver:-1.9.0}"
 echo "${ssh_ver}"
 wget -c --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
@@ -121,8 +121,7 @@ cd "libssh2-${ssh_ver}"
     --enable-static \
     --prefix=/usr/local/$HOST \
     --host=$HOST \
-    --without-openssl \
-    --with-wincng \
+    --with-crypto=wincng \
     LIBS="-lws2_32"
 make install -j$CPUCOUNT
 cd ..
