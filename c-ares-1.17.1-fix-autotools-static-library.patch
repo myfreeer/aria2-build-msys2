@@ -1,0 +1,28 @@
+From c35f8ff50710cd38776e9560389504dbd96307fa Mon Sep 17 00:00:00 2001
+From: bradh352 <brad@brad-house.com>
+Date: Mon, 23 Nov 2020 08:07:30 -0500
+Subject: [PATCH] Win32: Fix tools build with autotools static library When
+ c-ares is being built as static on Win32, CARES_STATICLIB must be defined,
+ but it wasn't being pulled in for the tools.
+
+Fixes: #384
+Fix By: Brad House (@bradh352)
+---
+ src/tools/Makefile.am | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/tools/Makefile.am b/src/tools/Makefile.am
+index 3fe28143..c503723c 100644
+--- a/src/tools/Makefile.am
++++ b/src/tools/Makefile.am
+@@ -15,6 +15,10 @@ AM_CPPFLAGS = -I$(top_builddir)/include \
+               -I$(top_srcdir)/include \
+               -I$(top_srcdir)/src/lib
+ 
++if USE_CPPFLAG_CARES_STATICLIB
++AM_CPPFLAGS += $(CPPFLAG_CARES_STATICLIB)
++endif
++
+ include Makefile.inc
+ 
+ LDADD = $(top_builddir)/src/lib/libcares.la

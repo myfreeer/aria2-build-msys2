@@ -1,4 +1,5 @@
 #!bash
+set -e -o pipefail
 case $MSYSTEM in
 MINGW32)
     export MINGW_PACKAGE_PREFIX=mingw-w64-i686
@@ -53,7 +54,7 @@ get_last_version() {
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.2.9}"
+expat_ver="${expat_ver:-2.2.10}"
 wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}"
@@ -68,7 +69,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2020/sqlite-autoconf-3320300.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2020/sqlite-autoconf-3340000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -88,18 +89,24 @@ rm -rf "${sqlite_name}"
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
-cares_ver="${cares_ver:-1.16.1}"
+cares_ver="${cares_ver:-1.17.1}"
 echo "c-ares-${cares_ver}"
 wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
-cd "c-ares-${cares_ver}" && \
+cd "c-ares-${cares_ver}"
+# https://github.com/c-ares/c-ares/issues/384
+# https://github.com/c-ares/c-ares/commit/c35f8ff50710cd38776e9560389504dbd96307fa
+if [ "${cares_ver}" = "1.17.1" ]; then
+    patch -p1 < ../c-ares-1.17.1-fix-autotools-static-library.patch
+    autoreconf -fi || autoreconf -fiv
+fi
 ./configure \
     --disable-shared \
     --enable-static \
     --without-random \
+    --disable-tests \
     --prefix=/usr/local/$HOST \
-    --host=$HOST \
-    LIBS="-lws2_32"
+    --host=$HOST
 make install -j$CPUCOUNT
 cd ..
 rm -rf "c-ares-${cares_ver}"
@@ -113,6 +120,11 @@ echo "${ssh_ver}"
 wget -c --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}"
+# https://github.com/libssh2/libssh2/pull/479
+# https://github.com/libssh2/libssh2/commit/ba149e804ef653cc05ed9803dfc94519ce9328f7
+if [ "${ssh_ver}" = "1.9.0" ]; then
+    patch -p1 < ../libssh2-1.9.0-wincng-multiple-definition.patch
+fi
 ./configure \
     --disable-shared \
     --enable-static \
@@ -124,9 +136,11 @@ make install -j$CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
 
+set +e +o pipefail
+
 if [[ -d aria2 ]]; then
     cd aria2
-    git checkout master
+    git checkout master || git checkout HEAD
     git reset --hard origin || git reset --hard
     git pull
 else
