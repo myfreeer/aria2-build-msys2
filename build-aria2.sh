@@ -1,5 +1,5 @@
 #!bash
-set -e -o pipefail
+set -e
 case $MSYSTEM in
 MINGW32)
     export MINGW_PACKAGE_PREFIX=mingw-w64-i686
@@ -21,8 +21,10 @@ if [[ "${GIT_USER_EMAIL}" = "" ]]; then
     git config --global user.email "you@example.com"
 fi
 
+set +e
 pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc \
     $MINGW_PACKAGE_PREFIX-winpthreads
+set -e
 
 PREFIX=/usr/local/$HOST
 CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
@@ -52,9 +54,11 @@ get_last_version() {
 }
 
 # expat
+set +e
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
 expat_ver="${expat_ver:-2.2.10}"
+set -e
 wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}"
@@ -68,10 +72,12 @@ cd ..
 rm -rf "expat-${expat_ver}"
 
 # sqlite
+set +e
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
 [[ ! "$sqlite_ver" ]] && sqlite_ver="2020/sqlite-autoconf-3340000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
+set -e
 tar xf "${sqlite_file}"
 echo ${sqlite_ver}
 sqlite_name=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+)")
@@ -86,10 +92,12 @@ cd ..
 rm -rf "${sqlite_name}"
 
 # c-ares: Async DNS support
+set +e
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 cares_ver="${cares_ver:-1.17.1}"
+set -e
 echo "c-ares-${cares_ver}"
 wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
@@ -112,10 +120,12 @@ cd ..
 rm -rf "c-ares-${cares_ver}"
 
 # libssh2
+set +e
 [[ ! "$ssh_ver" ]] &&
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
 ssh_ver="${ssh_ver:-1.9.0}"
+set -e
 echo "${ssh_ver}"
 wget -c --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
@@ -136,7 +146,7 @@ make install -j$CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
 
-set +e +o pipefail
+set +e
 
 if [[ -d aria2 ]]; then
     cd aria2
