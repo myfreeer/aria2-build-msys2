@@ -22,7 +22,8 @@ aria2 build scripts for `msys2` with custom patches.
 * download: add option `retry-on-400` to retry on http 400 bad request, which only effective if retry-wait > 0
 * download: add option `retry-on-403` to retry on http 403 forbidden, which only effective if retry-wait > 0
 * download: add option `retry-on-406` to retry on http 406 not acceptable, which only effective if retry-wait > 0
-* http: add option `http-want-digest` to choose whether to send the generated `Want-Digest` HTTP header or not ([#10](https://github.com/myfreeer/aria2-build-msys2/issues/10)
+* ~~http: add option `http-want-digest` to choose whether to send the generated `Want-Digest` HTTP header or not ([#10](https://github.com/myfreeer/aria2-build-msys2/issues/10))~~
+    * Removed in favor of upstream [`no-want-digest-header`](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-no-want-digest-header) option after [release-1.37.0](https://github.com/aria2/aria2/releases/tag/release-1.37.0) by commit [839dd2ca](https://github.com/aria2/aria2/commit/839dd2caf77863503d18252a1aff16cd1dde274c) 
 
 ### Environment 
 [MSYS2](http://www.msys2.org/)
