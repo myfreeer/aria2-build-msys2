@@ -86,12 +86,14 @@ rm -rf "${sqlite_name}"
 
 # c-ares: Async DNS support
 [[ ! "$cares_ver" ]] &&
-    cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
+    cares_ver="$(clean_html_index https://c-ares.org/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 echo "current latest c-ares: ${cares_ver}"
 cares_ver="1.19.1"
 echo "c-ares-${cares_ver}"
-wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
+# for newer version:
+# https://github.com/c-ares/c-ares/releases/download/v${cares_ver}/c-ares-${cares_ver}.tar.gz
+wget -c --no-check-certificate "https://github.com/c-ares/c-ares/releases/download/cares-1_19_1/c-ares-1.19.1.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
 # https://github.com/c-ares/c-ares/issues/384
